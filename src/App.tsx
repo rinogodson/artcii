@@ -1,8 +1,16 @@
+// TODO:
+// -- modularize components for a neat structure
+// -- add layers logic
+// -- add panning for mobile
+// -- add the settings expand for mobile
+//
 import { useEffect, useRef, useState } from "react";
 
 function App() {
-  const [grid, setGrid] = useState<string[][]>(
-    Array.from({ length: 12 }, () => Array(20).fill(" ")),
+  const [grid, setGrid] = useState<{ c: string; bg: string; fg: string }[][]>(
+    Array.from({ length: 12 }, () =>
+      Array(20).fill({ c: " ", bg: "transparent", fg: "#ffffff" }),
+    ),
   );
 
   const [wState, setWState] = useState<{
@@ -27,9 +35,11 @@ function App() {
 
   const handleDrawing = (r: number, c: number) => {
     if (wState.isPanningMode) return;
-    setGrid((prev) =>
+    setGrid((prev: typeof grid) =>
       prev.map((row, i) =>
-        row.map((ch, j) => (i === r && j === c ? brush : ch)),
+        row.map((ch, j) =>
+          i === r && j === c ? { ...grid[i][j], c: brush } : ch,
+        ),
       ),
     );
   };
@@ -155,17 +165,21 @@ function App() {
                 onMouseUp={() => setIsDrawing(false)}
                 onMouseLeave={() => setIsDrawing(false)}
               >
-                {grid.map((row: string[], r: number) => (
+                {grid.map((row: (typeof grid)[0], r: number) => (
                   <div key={r} className="flex">
-                    {row.map((ch, c) => (
+                    {row.map((ch: (typeof grid)[0][0], c) => (
                       <span
                         key={c}
+                        style={{
+                          color: ch.fg,
+                          background: ch.bg === "transparent" ? "" : ch.bg,
+                        }}
                         onMouseOver={() => isDrawing && handleDrawing(r, c)}
                         onMouseDown={() => handleDrawing(r, c)}
                         onClick={() => handleDrawing(r, c)}
                         className="border-[0.001em] border-[rgba(255,255,255,0.06)] hover:bg-[#1b1b1b] hover:text-[rgba(255,255,255,0.8)] transition-all duration-50"
                       >
-                        {ch}
+                        {ch.c}
                       </span>
                     ))}
                   </div>
