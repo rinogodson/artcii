@@ -1,15 +1,32 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 function App() {
   const [grid, setGrid] = useState<string[][]>(
     Array.from({ length: 12 }, () => Array(20).fill(" ")),
   );
 
-  const [brush, setBrush] = useState<string>("#");
+  const [wState, setWState] = useState<{
+    x: number;
+    y: number;
+    zoom: number;
+    isPanning: boolean;
+    isPanningMode: boolean;
+  }>({
+    x: 0,
+    y: 0,
+    zoom: 1,
+    isPanning: false,
+    isPanningMode: false,
+  });
 
+  const [brush, setBrush] = useState<string>("#");
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
 
+  const zoomRef = useRef<HTMLDivElement>(null);
+  const panStart = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
   const handleDrawing = (r: number, c: number) => {
+    if (wState.isPanningMode) return;
     setGrid((prev) =>
       prev.map((row, i) =>
         row.map((ch, j) => (i === r && j === c ? brush : ch)),
@@ -17,19 +34,123 @@ function App() {
     );
   };
 
+  //zooming logic
+  useEffect(() => {
+    const el = zoomRef.current;
+    if (!el) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.05 : 0.05;
+      setWState((p) => ({
+        ...p,
+        zoom: Math.max(0.5, p.zoom + delta),
+      }));
+    };
+
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => el.removeEventListener("wheel", handleWheel);
+  }, []);
+
+  //panning logic
+  useEffect(() => {
+    const el = zoomRef.current;
+    if (!el) return;
+
+    const handleMouseDown = (e: MouseEvent) => {
+      if (!wState.isPanningMode) return;
+      setWState((p) => ({ ...p, isPanning: true }));
+      panStart.current = { x: e.clientX - wState.x, y: e.clientY - wState.y };
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!wState.isPanning) return;
+      setWState((p) => ({
+        ...p,
+        x: e.clientX - panStart.current.x,
+        y: e.clientY - panStart.current.y,
+      }));
+    };
+
+    const handleMouseUp = () => setWState((p) => ({ ...p, isPanning: false }));
+
+    el.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      el.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [wState.isPanning, wState.isPanningMode, wState.x, wState.y]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === "Space") {
+        e.preventDefault();
+        setWState((p) => ({ ...p, isPanningMode: true }));
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.code === "Space") {
+        setWState((p) => ({ ...p, isPanningMode: false }));
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, []);
+
+  //the ctrl/cmd + +/- shortcuts useeffect
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === "+" || e.key === "=")) {
+        e.preventDefault();
+        setWState((p) => ({ ...p, zoom: Math.min(5, p.zoom + 0.1) }));
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === "-") {
+        e.preventDefault();
+        setWState((p) => ({ ...p, zoom: Math.max(0.5, p.zoom - 0.1) }));
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === "0") {
+        e.preventDefault();
+        setWState((p) => ({ ...p, zoom: 1 }));
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   return (
-    <div className="sm:grid grid-cols-[1.4fr_3fr_1fr] grid-rows-[100vh] flex flex-col sm:flex-row h-screen w-screen sm:py-0 py-5 pb-0">
-      <div className="flex w-full sm:h-full h-fit justify-center">
-        <div className="border-1 m-10 border-[rgba(255,255,255,0.4)] sm:px-7 px-8 sm:py-7 py-9 rounded-2xl w-fit h-fit">
+    <div className="overflow-hidden sm:grid grid-cols-[20vw_60vw_20vw] grid-rows-[100vh] flex flex-col sm:flex-row h-screen w-screen sm:py-0 py-5 pb-0">
+      <div className="flex flex-col w-full min-w-[18em] sm:h-full h-fit justify-start items-center z-100">
+        <div className="border-1 m-10 border-[rgba(255,255,255,0.4)] bg-black sm:px-7 px-8 sm:py-7 py-9 rounded-2xl w-fit h-fit">
           <img src="header.svg" alt="header" className="w-70" />
         </div>
+        <div className="shadow-[0_0_50px_rgba(0,0,0,1)] bg-[rgba(40,40,40,0.6)] backdrop-blur-2xl w-[90%] h-fit min-h-100 sm:block hidden rounded-3xl border-1 border-[rgba(255,255,255,0.2)]"></div>
       </div>
-      <div className="w-full h-full flex gap-15 sm:my-0 my-10 sm:flex-col-reverse flex-col justify-center items-center">
-        <div className="sm:w-[100%] w-[80%] aspect-square flex justify-center items-center p-1">
-          <div className="w-fit h-fit border-1 border-[rgba(255,255,255,0.3)] p-2 rounded-[0.6em]">
+      <div
+        ref={zoomRef}
+        className="cursor-crosshair w-full h-full flex gap-15 sm:my-0 my-10 sm:flex-col-reverse flex-col justify-center items-center"
+      >
+        <div className="w-[100%] h-full aspect-square flex justify-center items-center p-1">
+          <div
+            style={{
+              transform: `translate(${wState.x}px, ${wState.y}px) scale(${wState.zoom})`,
+            }}
+            className="w-fit h-fit border-1 border-[rgba(255,255,255,0.3)] p-2 rounded-[0.6em] transition-all duration-10"
+          >
             <div className="w-fit h-fit border-1 border-[rgba(255,255,255,0.1)]">
               <pre
-                className="w-fit font-mono leading-[1em] sm:text-4xl text-3xl cursor-crosshair select-none"
+                className="w-fit font-mono leading-[1em] sm:text-4xl text-3xl select-none"
                 onMouseDown={() => setIsDrawing(true)}
                 onMouseUp={() => setIsDrawing(false)}
                 onMouseLeave={() => setIsDrawing(false)}
@@ -54,8 +175,9 @@ function App() {
           </div>
         </div>
       </div>
-      <div className="w-full h-full sm:px-0 px-0 flex justify-center items-center">
-        <div className="text-white sm:mr-5 w-full sm:h-[65%] h-full border-1 sm:border-b-1 sm:border-t-1 border-t-2 border-b-0 border-[rgba(255,255,255,0.4)] rounded-3xl sm:rounded-b-3xl rounded-b-[0]"></div>
+
+      <div className="w-full h-full sm:px-0 px-0 flex justify-end items-center">
+        <div className="shadow-[0_0_50px_rgba(0,0,0,1)] w-full min-w-[18em] text-white bg-[rgba(40,40,40,0.6)] backdrop-blur-2xl z-1000 sm:mr-4 sm:h-[65%] h-full border-1 sm:border-b-1 sm:border-t-1 border-t-2 border-b-0 border-[rgba(255,255,255,0.2)] rounded-3xl sm:rounded-b-3xl rounded-b-[0]"></div>
       </div>
     </div>
   );
