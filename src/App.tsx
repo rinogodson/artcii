@@ -3,8 +3,10 @@
 // -- add layers logic
 // -- add panning for mobile
 // -- add the settings expand for mobile
-//
+
 import { useEffect, useRef, useState } from "react";
+import Settings from "./Components/Settings/Settings";
+import Layers from "./Components/Layers/Layers";
 
 function App() {
   const [grid, setGrid] = useState<{ c: string; bg: string; fg: string }[][]>(
@@ -13,22 +15,39 @@ function App() {
     ),
   );
 
+  const [layers, setLayers] = useState<
+    {
+      name: string;
+      show: boolean;
+      g: typeof grid;
+    }[]
+  >([
+    {
+      name: "Layer 1",
+      show: true,
+      g: Array.from({ length: 12 }, () =>
+        Array(20).fill({ c: " ", bg: "transparent", fg: "#ffffff" }),
+      ),
+    },
+  ]);
+
   const [wState, setWState] = useState<{
     x: number;
     y: number;
     zoom: number;
     isPanning: boolean;
     isPanningMode: boolean;
+    isDrawing: boolean;
   }>({
     x: 0,
     y: 0,
     zoom: 1,
     isPanning: false,
     isPanningMode: false,
+    isDrawing: false,
   });
 
-  const [brush, setBrush] = useState<string>("#");
-  const [isDrawing, setIsDrawing] = useState<boolean>(false);
+  const [brush, setBrush] = useState<string>("R");
 
   const zoomRef = useRef<HTMLDivElement>(null);
   const panStart = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -43,6 +62,9 @@ function App() {
       ),
     );
   };
+
+  // everything under this is either a shortcut setting or a panning and zooming control
+  // don't touch it if you don't need to, do what i say..!
 
   //zooming logic
   useEffect(() => {
@@ -138,62 +160,91 @@ function App() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+  // CAN TOUCH CODE UNDER THIS
 
   return (
-    <div className="overflow-hidden sm:grid grid-cols-[20vw_60vw_20vw] grid-rows-[100vh] flex flex-col sm:flex-row h-screen w-screen sm:py-0 py-5 pb-0">
-      <div className="flex flex-col w-full min-w-[18em] sm:h-full h-fit justify-start items-center z-100">
-        <div className="border-1 m-10 border-[rgba(255,255,255,0.4)] bg-black sm:px-7 px-8 sm:py-7 py-9 rounded-2xl w-fit h-fit">
-          <img src="header.svg" alt="header" className="w-70" />
+    <>
+      <div className="overflow-hidden sm:grid grid-cols-[20vw_60vw_20vw] grid-rows-[100vh] flex flex-col sm:flex-row h-[calc(100vh_-_1.5em)] w-screen sm:py-0 py-5 pb-0">
+        <div className="flex flex-col w-full min-w-[18em] sm:h-full h-fit justify-start items-center z-100">
+          <div className="border-1 m-10 border-[rgba(255,255,255,0.4)] bg-black sm:px-7 px-8 sm:py-7 py-9 rounded-2xl w-fit h-fit">
+            <img src="header.svg" alt="header" className="w-70" />
+          </div>
+          <div className="shadow-[0_0_50px_rgba(0,0,0,1)] bg-[rgba(40,40,40,0.6)] backdrop-blur-2xl w-[90%] h-fit min-h-100 sm:block hidden rounded-3xl border-1 border-[rgba(255,255,255,0.2)]">
+            <Layers />
+          </div>
         </div>
-        <div className="shadow-[0_0_50px_rgba(0,0,0,1)] bg-[rgba(40,40,40,0.6)] backdrop-blur-2xl w-[90%] h-fit min-h-100 sm:block hidden rounded-3xl border-1 border-[rgba(255,255,255,0.2)]"></div>
-      </div>
-      <div
-        ref={zoomRef}
-        className="cursor-crosshair w-full h-full flex gap-15 sm:my-0 my-10 sm:flex-col-reverse flex-col justify-center items-center"
-      >
-        <div className="w-[100%] h-full aspect-square flex justify-center items-center p-1">
-          <div
-            style={{
-              transform: `translate(${wState.x}px, ${wState.y}px) scale(${wState.zoom})`,
-            }}
-            className="w-fit h-fit border-1 border-[rgba(255,255,255,0.3)] p-2 rounded-[0.6em] transition-all duration-10"
-          >
-            <div className="w-fit h-fit border-1 border-[rgba(255,255,255,0.1)]">
-              <pre
-                className="w-fit font-mono leading-[1em] sm:text-4xl text-3xl select-none"
-                onMouseDown={() => setIsDrawing(true)}
-                onMouseUp={() => setIsDrawing(false)}
-                onMouseLeave={() => setIsDrawing(false)}
-              >
-                {grid.map((row: (typeof grid)[0], r: number) => (
-                  <div key={r} className="flex">
-                    {row.map((ch: (typeof grid)[0][0], c) => (
-                      <span
-                        key={c}
-                        style={{
-                          color: ch.fg,
-                          background: ch.bg === "transparent" ? "" : ch.bg,
-                        }}
-                        onMouseOver={() => isDrawing && handleDrawing(r, c)}
-                        onMouseDown={() => handleDrawing(r, c)}
-                        onClick={() => handleDrawing(r, c)}
-                        className="border-[0.001em] border-[rgba(255,255,255,0.06)] hover:bg-[#1b1b1b] hover:text-[rgba(255,255,255,0.8)] transition-all duration-50"
-                      >
-                        {ch.c}
-                      </span>
-                    ))}
-                  </div>
-                ))}
-              </pre>
+        <div
+          ref={zoomRef}
+          className="cursor-crosshair w-full h-full flex gap-15 sm:my-0 my-10 sm:flex-col-reverse flex-col justify-center items-center"
+        >
+          <div className="w-[100%] h-full aspect-square flex justify-center items-center p-1">
+            <div
+              style={{
+                transform: `translate(${wState.x}px, ${wState.y}px) scale(${wState.zoom})`,
+              }}
+              className="w-fit h-fit border-1 border-[rgba(255,255,255,0.3)] p-2 rounded-[0.6em] transition-all duration-1"
+            >
+              <div className="w-fit h-fit border-1 border-[rgba(255,255,255,0.1)]">
+                <pre
+                  className="w-fit font-[Hack] leading-[1em] sm:text-4xl text-3xl select-none"
+                  onMouseDown={() =>
+                    setWState((p) => ({ ...p, isDrawing: true }))
+                  }
+                  onMouseUp={() =>
+                    setWState((p) => ({ ...p, isDrawing: false }))
+                  }
+                  onMouseLeave={() =>
+                    setWState((p) => ({ ...p, isDrawing: false }))
+                  }
+                >
+                  {grid.map((row: (typeof grid)[0], r: number) => (
+                    <div key={r} className="flex">
+                      {row.map((ch: (typeof grid)[0][0], c) => (
+                        <span
+                          key={c}
+                          style={{
+                            color: ch.fg,
+                            background: ch.bg === "transparent" ? "" : ch.bg,
+                          }}
+                          onMouseOver={() =>
+                            wState.isDrawing && handleDrawing(r, c)
+                          }
+                          onMouseDown={() => handleDrawing(r, c)}
+                          onClick={() => handleDrawing(r, c)}
+                          onContextMenu={(e) => {
+                            e.preventDefault();
+                            if (wState.isPanningMode) return;
+                            setGrid((prev: typeof grid) =>
+                              prev.map((row, i) =>
+                                row.map((ch, j) =>
+                                  i === r && j === c
+                                    ? { ...grid[i][j], c: " " }
+                                    : ch,
+                                ),
+                              ),
+                            );
+                          }}
+                          className="border-[0.001em] border-[rgba(255,255,255,0.06)] hover:bg-[#1b1b1b] hover:text-[rgba(255,255,255,0.8)] transition-all duration-50"
+                        >
+                          {ch.c}
+                        </span>
+                      ))}
+                    </div>
+                  ))}
+                </pre>
+              </div>
             </div>
           </div>
         </div>
+        <div className="w-full h-full sm:px-0 px-0 flex justify-end items-center">
+          <div className="overflow-scroll shadow-[0_0_50px_rgba(0,0,0,1)] w-full min-w-[20em] text-white bg-[rgba(40,40,40,0.6)] backdrop-blur-2xl z-1000 sm:mr-4 sm:h-[90%] h-full border-1 sm:border-b-1 sm:border-t-1 border-t-2 border-b-0 border-[rgba(255,255,255,0.2)] rounded-3xl sm:rounded-b-3xl rounded-b-[0]">
+            <Settings />
+          </div>
+        </div>
       </div>
-
-      <div className="w-full h-full sm:px-0 px-0 flex justify-end items-center">
-        <div className="shadow-[0_0_50px_rgba(0,0,0,1)] w-full min-w-[18em] text-white bg-[rgba(40,40,40,0.6)] backdrop-blur-2xl z-1000 sm:mr-4 sm:h-[65%] h-full border-1 sm:border-b-1 sm:border-t-1 border-t-2 border-b-0 border-[rgba(255,255,255,0.2)] rounded-3xl sm:rounded-b-3xl rounded-b-[0]"></div>
-      </div>
-    </div>
+      <div className="w-full h-[1.5em] bg-[#0b0b0b] border-t-1 border-[#2b2b2b]"></div>
+      <div className="absolute top-[2em] left-[50%] translate-x-[-50%] grid grid-cols-3 h-15 w-50 mx-5 border-1 bg-[rgba(40,40,40,0.6)] backdrop-blur-2xl border-[#3b3b3b] rounded-xl gap-1 p-3 overflow-hidden"></div>
+    </>
   );
 }
 
