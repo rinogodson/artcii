@@ -170,7 +170,7 @@ function App() {
           <div className="border-1 m-10 border-[rgba(255,255,255,0.4)] bg-black sm:px-7 px-8 sm:py-7 py-9 rounded-2xl w-fit h-fit">
             <img src="header.svg" alt="header" className="w-70" />
           </div>
-          <div className="shadow-[0_0_50px_rgba(0,0,0,1)] bg-[rgba(40,40,40,0.6)] backdrop-blur-2xl w-[90%] h-fit min-h-100 sm:block hidden rounded-3xl border-1 border-[rgba(255,255,255,0.2)]">
+          <div className="gap-3 flex flex-col p-3 shadow-[0_0_50px_rgba(0,0,0,1)] bg-[rgba(40,40,40,0.6)] backdrop-blur-2xl w-[90%] h-fit min-h-100 rounded-3xl border-1 border-[rgba(255,255,255,0.2)]">
             <Layers />
           </div>
         </div>
@@ -244,7 +244,7 @@ function App() {
         </div>
       </div>
       <div className="w-full h-[1.5em] bg-[#0b0b0b] border-t-1 border-[#2b2b2b]"></div>
-      <div className="absolute top-[2em] left-[50%] translate-x-[-50%] grid grid-cols-3 place-items-center h-[4em] w-fit p-2 border-1 bg-[rgba(40,40,40,0.6)] backdrop-blur-2xl border-[#3b3b3b] rounded-[1.5rem] gap-2 overflow-hidden">
+      <div className="shadow-[0_0_50px_rgba(0,0,0,1)] absolute top-[2em] left-[50%] translate-x-[-50%] grid grid-cols-3 place-items-center h-[4em] w-fit p-2 border-1 bg-[rgba(40,40,40,0.6)] backdrop-blur-2xl border-[#3b3b3b] rounded-[1.5rem] gap-2 overflow-hidden">
         <div className="h-full aspect-square flex justify-center items-center bg-[#3b3b3b] rounded-2xl">
           <Brush />
         </div>
