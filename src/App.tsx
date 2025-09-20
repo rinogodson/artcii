@@ -7,6 +7,7 @@
 import { useEffect, useRef, useState } from "react";
 import Settings from "./Components/Settings/Settings";
 import Layers from "./Components/Layers/Layers";
+import { Brush, Eraser, PaintBucket } from "lucide-react";
 
 function App() {
   const [grid, setGrid] = useState<{ c: string; bg: string; fg: string }[][]>(
@@ -237,13 +238,23 @@ function App() {
           </div>
         </div>
         <div className="w-full h-full sm:px-0 px-0 flex justify-end items-center">
-          <div className="overflow-scroll shadow-[0_0_50px_rgba(0,0,0,1)] w-full min-w-[20em] text-white bg-[rgba(40,40,40,0.6)] backdrop-blur-2xl z-1000 sm:mr-4 sm:h-[90%] h-full border-1 sm:border-b-1 sm:border-t-1 border-t-2 border-b-0 border-[rgba(255,255,255,0.2)] rounded-3xl sm:rounded-b-3xl rounded-b-[0]">
+          <div className="overflow-scroll overflow-x-hidden shadow-[0_0_50px_rgba(0,0,0,1)] w-full min-w-[20em] text-white bg-[rgba(40,40,40,0.6)] backdrop-blur-2xl z-1000 sm:mr-4 sm:h-[90%] h-full border-1 sm:border-b-1 sm:border-t-1 border-t-2 border-b-0 border-[rgba(255,255,255,0.2)] rounded-3xl sm:rounded-b-3xl rounded-b-[0]">
             <Settings />
           </div>
         </div>
       </div>
       <div className="w-full h-[1.5em] bg-[#0b0b0b] border-t-1 border-[#2b2b2b]"></div>
-      <div className="absolute top-[2em] left-[50%] translate-x-[-50%] grid grid-cols-3 h-15 w-50 mx-5 border-1 bg-[rgba(40,40,40,0.6)] backdrop-blur-2xl border-[#3b3b3b] rounded-xl gap-1 p-3 overflow-hidden"></div>
+      <div className="absolute top-[2em] left-[50%] translate-x-[-50%] grid grid-cols-3 place-items-center h-[4em] w-fit p-2 border-1 bg-[rgba(40,40,40,0.6)] backdrop-blur-2xl border-[#3b3b3b] rounded-[1.5rem] gap-2 overflow-hidden">
+        <div className="h-full aspect-square flex justify-center items-center bg-[#3b3b3b] rounded-2xl">
+          <Brush />
+        </div>
+        <div className="h-full aspect-square flex justify-center items-center bg-[#3b3b3b] rounded-2xl">
+          <Eraser />
+        </div>
+        <div className="h-full aspect-square flex justify-center items-center bg-[#3b3b3b] rounded-2xl">
+          <PaintBucket />
+        </div>
+      </div>
     </>
   );
 }
