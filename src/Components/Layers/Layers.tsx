@@ -1,4 +1,5 @@
 import { Eye, EyeClosed, GripVertical, Layers2, Plus, X } from "lucide-react";
+import { useState } from "react";
 
 function Layers({
   layers,
@@ -29,11 +30,46 @@ function Layers({
         ))}
       </div>
       <div className="w-full h-10 flex justify-around">
-        <div className="flex justify-center items-center gap-2 hover:bg-[#2b2b2b] cursor-pointer px-3 rounded-full">
+        <div
+          onClick={() => {
+            if (layers.length <= 1) return;
+
+            const newLayers = layers.filter((_, idx) => idx !== selectedLayer);
+
+            let newSelected = selectedLayer;
+            if (selectedLayer >= newLayers.length) {
+              newSelected = newLayers.length - 1;
+            }
+
+            setLayers(newLayers);
+            setSelectedLayer(newSelected);
+          }}
+          className="flex justify-center items-center gap-2 hover:bg-[#3b2b2b] cursor-pointer px-3 rounded-full"
+        >
           <X />
           <p>Delete</p>
         </div>
-        <div className="flex justify-center items-center gap-2 hover:bg-[#2b2b2b] cursor-pointer px-3 rounded-full">
+        <div
+          onClick={() => {
+            if (layers.length === 0) return;
+
+            const newLayer = {
+              name: `Layer ${layers.length + 1}`,
+              show: true,
+              g: Array.from({ length: layers[0].g.length }, () =>
+                Array(layers[0].g[0].length).fill({
+                  c: " ",
+                  bg: "transparent",
+                  fg: "#ffffff",
+                }),
+              ),
+            };
+
+            setLayers((prev: any[]) => [...prev, newLayer]);
+            setSelectedLayer(layers.length);
+          }}
+          className="flex justify-center items-center gap-2 hover:bg-[#2b2b2b] cursor-pointer px-3 rounded-full"
+        >
           <Plus />
           <p>New Layer</p>
         </div>
@@ -59,6 +95,7 @@ const Layer = ({
   selected: number;
   setSelected: any;
 }) => {
+  const [readOnly, setReadOnly] = useState<boolean>(true);
   return (
     <div
       onClick={() => {
@@ -73,9 +110,31 @@ const Layer = ({
     >
       <div className="flex gap-2">
         <Layers2 size={23} />
-        <p className="whitespace-nowrap overflow-hidden overflow-ellipsis w-[14ch]">
-          {layer.name}
-        </p>
+        <input
+          onClick={() => {
+            setReadOnly(false);
+          }}
+          readOnly={readOnly}
+          onBlur={() => setReadOnly(true)}
+          value={layer.name}
+          onChange={(e) => {
+            setLayers((prev: any[]) =>
+              prev.map((l, idx) =>
+                idx === i ? { ...l, name: e.target.value } : l,
+              ),
+            );
+          }}
+          style={
+            !readOnly
+              ? {
+                  background: "rgba(0,0,0,0.4)",
+                  paddingInline: "0.5em",
+                  width: "15ch",
+                }
+              : {}
+          }
+          className="whitespace-nowrap overflow-hidden overflow-ellipsis w-[11ch]"
+        />
       </div>
       <div className="flex gap-2">
         <div

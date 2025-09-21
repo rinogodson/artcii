@@ -183,19 +183,19 @@ function Settings({
         </div>
         <div className="justify-end flex h-26 mx-5 border-1 border-l-0 bg-[#121212] border-[#3b3b3b] rounded-4xl rounded-l-[0] gap-1 p-2">
           <div className="font-[Geist] relative grid grid-cols-2 grid-rows-2 p-1 h-full aspect-square bg-[#111111] shadow-[0_0_10px_rgba(0,0,0,0.1)] border-1 border-[#4b4b4b] rotate-45 scale-120 rounded-[1.5rem]">
-            <div className="cursor-pointer bg-[#1b1b1b] rounded-[1.25em] flex justify-center items-center rotate-[-45deg] rounded-b-[0]">
+            <div className="hover:bg-[#2a2a2a] hover:z-50 active:bg-[#1b1b1b] active:scale-120 transition-all duration-150 cursor-pointer bg-[#1b1b1b] rounded-[1.25em] flex justify-center items-center rotate-[-45deg] rounded-b-[0]">
               │
             </div>
-            <div className="cursor-pointer bg-[#1b1b1b] rounded-[1.25em] flex justify-center items-center rotate-[-45deg] rounded-l-[0]">
+            <div className="hover:bg-[#2a2a2a] hover:z-50  active:bg-[#1b1b1b] active:scale-120 transition-all duration-150 cursor-pointer bg-[#1b1b1b] rounded-[1.25em] flex justify-center items-center rotate-[-45deg] rounded-l-[0]">
               ─
             </div>
-            <div className="cursor-pointer bg-[#1b1b1b] rounded-[1.25em] flex justify-center items-center rotate-[-45deg] rounded-r-[0]">
+            <div className="hover:bg-[#2a2a2a] hover:z-50  active:bg-[#1b1b1b] active:scale-120 transition-all duration-150 cursor-pointer bg-[#1b1b1b] rounded-[1.25em] flex justify-center items-center rotate-[-45deg] rounded-r-[0]">
               ─
             </div>
-            <div className="cursor-pointer bg-[#1b1b1b] rounded-[1.25em] flex justify-center items-center rotate-[-45deg] rounded-t-[0]">
+            <div className="hover:bg-[#2a2a2a] hover:z-50 active:bg-[#1b1b1b] active:scale-120 transition-all duration-150 cursor-pointer bg-[#1b1b1b] rounded-[1.25em] flex justify-center items-center rotate-[-45deg] rounded-t-[0]">
               │
             </div>
-            <div className="cursor-pointer bg-[#2b2b2b] border-1 border-[#3b3b3b] rounded-full w-11 aspect-square absolute left-[50%] translate-x-[-50%] translate-y-[50%] bottom-[50%] rotate-[-45deg] flex justify-center items-center">
+            <div className="hover:scale-110 z-100 active:scale-100 transition-all duration-150 cursor-pointer bg-[#2b2b2b] border-1 border-[#3b3b3b] rounded-full w-11 aspect-square absolute left-[50%] translate-x-[-50%] translate-y-[50%] bottom-[50%] rotate-[-45deg] flex justify-center items-center">
               ┾
             </div>
           </div>

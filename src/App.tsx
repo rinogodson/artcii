@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Settings from "./Components/Settings/Settings";
 import Layers from "./Components/Layers/Layers";
 import { Brush, Eraser, PaintBucket } from "lucide-react";
+import { ExportSection } from "./Components/ExportSection/ExportSection";
 
 const ROWS = 12;
 const COLS = 20;
@@ -50,6 +51,8 @@ function App() {
     },
   ]);
 
+  const [tool, setTool] = useState<number>(0);
+
   const [wState, setWState] = useState<{
     x: number;
     y: number;
@@ -94,7 +97,7 @@ function App() {
     setGrid(newGrid);
   }, [layers]);
 
-  const handleDrawing = (r: number, c: number) => {
+  const handleDrawing = (r: number, c: number, char: string) => {
     if (wState.isPanningMode) return;
 
     setLayers((prevLayers) =>
@@ -102,7 +105,7 @@ function App() {
         if (idx !== selectedLayer) return layer;
         const newGrid = layer.g.map((row, i) =>
           row.map((cell, j) =>
-            i === r && j === c ? { ...cell, c: brush } : cell,
+            i === r && j === c ? { ...cell, c: char } : cell,
           ),
         );
 
@@ -273,22 +276,18 @@ function App() {
                             background: ch.bg === "transparent" ? "" : ch.bg,
                           }}
                           onMouseOver={() =>
-                            wState.isDrawing && handleDrawing(r, c)
+                            wState.isDrawing &&
+                            handleDrawing(r, c, tool == 0 ? brush : " ")
                           }
-                          onMouseDown={() => handleDrawing(r, c)}
-                          onClick={() => handleDrawing(r, c)}
+                          onMouseDown={() =>
+                            handleDrawing(r, c, tool == 0 ? brush : " ")
+                          }
+                          onClick={() =>
+                            handleDrawing(r, c, tool == 0 ? brush : " ")
+                          }
                           onContextMenu={(e) => {
                             e.preventDefault();
-                            if (wState.isPanningMode) return;
-                            setGrid((prev: typeof grid) =>
-                              prev.map((row, i) =>
-                                row.map((ch, j) =>
-                                  i === r && j === c
-                                    ? { ...grid[i][j], c: " " }
-                                    : ch,
-                                ),
-                              ),
-                            );
+                            handleDrawing(r, c, " ");
                           }}
                           className="w-[1ch] border-[0.001em] border-[rgba(255,255,255,0.06)] hover:bg-[#1b1b1b] hover:text-[rgba(255,255,255,0.8)] transition-all duration-50"
                         >
@@ -314,17 +313,23 @@ function App() {
         </div>
       </div>
       <div className="w-full h-[1.5em] bg-[#0b0b0b] border-t-1 border-[#2b2b2b]"></div>
-      <div className="shadow-[0_0_50px_rgba(0,0,0,1)] absolute top-[2em] left-[50%] translate-x-[-50%] grid grid-cols-3 place-items-center h-[4em] w-fit p-2 border-1 bg-[rgba(40,40,40,0.6)] backdrop-blur-2xl border-[#3b3b3b] rounded-[1.5rem] gap-2 overflow-hidden">
-        <div className="h-full aspect-square flex justify-center items-center bg-[#3b3b3b] rounded-2xl">
+      <div className="shadow-[0_0_50px_rgba(0,0,0,1)] absolute top-[2em] left-[50%] translate-x-[-50%] grid grid-cols-2 place-items-center h-[4em] w-fit p-2 border-1 bg-[rgba(40,40,40,0.6)] backdrop-blur-2xl border-[#3b3b3b] rounded-[1.5rem] gap-2 overflow-hidden">
+        <div
+          style={{ background: tool == 0 ? "#2b2b2b" : "" }}
+          onClick={() => setTool(0)}
+          className="cursor-pointer h-full aspect-square flex justify-center items-center rounded-2xl"
+        >
           <Brush />
         </div>
-        <div className="h-full aspect-square flex justify-center items-center bg-[#3b3b3b] rounded-2xl">
+        <div
+          style={{ background: tool == 1 ? "#2b2b2b" : "" }}
+          onClick={() => setTool(1)}
+          className="cursor-pointer h-full aspect-square flex justify-center items-center rounded-2xl"
+        >
           <Eraser />
         </div>
-        <div className="h-full aspect-square flex justify-center items-center bg-[#3b3b3b] rounded-2xl">
-          <PaintBucket />
-        </div>
       </div>
+      <ExportSection />
     </>
   );
 }
