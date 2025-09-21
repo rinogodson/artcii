@@ -1,6 +1,6 @@
 import { Eye, EyeClosed, GripVertical, Layers2, Plus, X } from "lucide-react";
 import { useState } from "react";
-
+import { Draggable, Droppable, DragDropContext } from "@hello-pangea/dnd";
 function Layers({
   layers,
   setLayers,
@@ -16,18 +16,61 @@ function Layers({
   selectedLayer: number;
   setSelectedLayer: any;
 }) {
+  const handleDragEnd = (result: any) => {
+    if (!result.destination) return;
+    const reordered = Array.from(layers);
+    const [removed] = reordered.splice(result.source.index, 1);
+    reordered.splice(result.destination.index, 0, removed);
+
+    setLayers(reordered);
+
+    if (result.source.index === selectedLayer) {
+      setSelectedLayer(result.destination.index);
+    } else if (
+      result.source.index < selectedLayer &&
+      result.destination.index >= selectedLayer
+    ) {
+      setSelectedLayer((prev: number) => prev - 1);
+    } else if (
+      result.source.index > selectedLayer &&
+      result.destination.index <= selectedLayer
+    ) {
+      setSelectedLayer((prev: number) => prev + 1);
+    }
+  };
+
   return (
     <>
       <div className="w-full h-full bg-[rgba(0,0,0,0.5)] rounded-[0.75rem] overflow-hidden border-1 border-black">
-        {layers.map((item, i) => (
-          <Layer
-            i={i}
-            selected={selectedLayer}
-            setSelected={setSelectedLayer}
-            setLayers={setLayers}
-            layer={item}
-          />
-        ))}
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="layers">
+            {(provided) => (
+              <div {...provided.droppableProps} ref={provided.innerRef}>
+                {layers.map((item, i) => (
+                  <Draggable key={i} draggableId={`layer-${i}`} index={i}>
+                    {(provided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        className="h-10"
+                      >
+                        <Layer
+                          i={i}
+                          selected={selectedLayer}
+                          setSelected={setSelectedLayer}
+                          setLayers={setLayers}
+                          layer={item}
+                          dragprops={provided.dragHandleProps}
+                        />
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       </div>
       <div className="w-full h-10 flex justify-around">
         <div
@@ -84,6 +127,7 @@ const Layer = ({
   setLayers,
   selected,
   setSelected,
+  dragprops,
 }: {
   layer: {
     name: string;
@@ -94,6 +138,7 @@ const Layer = ({
   setLayers: any;
   selected: number;
   setSelected: any;
+  dragprops: any;
 }) => {
   const [readOnly, setReadOnly] = useState<boolean>(true);
   return (
@@ -146,7 +191,9 @@ const Layer = ({
         >
           {layer.show ? <Eye /> : <EyeClosed />}
         </div>
-        <GripVertical color="rgba(255,255,255,0.2)" />
+        <div {...dragprops}>
+          <GripVertical color="rgba(255,255,255,0.2)" />
+        </div>
       </div>
     </div>
   );

@@ -404,4 +404,4 @@ const intersects = [
   { char: "╿", code: "2100", char2: "" },
 ];
 
-export { boxs, specialBoxes };
+export { boxs, specialBoxes, intersects };

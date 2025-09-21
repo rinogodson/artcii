@@ -1,13 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import Settings from "./Components/Settings/Settings";
 import Layers from "./Components/Layers/Layers";
-import { Brush, Eraser, PaintBucket } from "lucide-react";
+import { Brush, Eraser } from "lucide-react";
 import { ExportSection } from "./Components/ExportSection/ExportSection";
+import html2canvas from "html2canvas";
 
 const ROWS = 12;
 const COLS = 20;
 
 function App() {
+  const [colors, setColors] = useState<{ fg: string; bg: string }>({
+    fg: "white",
+    bg: "transparent",
+  });
   const [dimensions, setDimensions] = useState<{ rows: number; cols: number }>({
     rows: ROWS,
     cols: COLS,
@@ -105,7 +110,14 @@ function App() {
         if (idx !== selectedLayer) return layer;
         const newGrid = layer.g.map((row, i) =>
           row.map((cell, j) =>
-            i === r && j === c ? { ...cell, c: char } : cell,
+            i === r && j === c
+              ? {
+                  ...cell,
+                  c: char,
+                  fg: tool === 0 ? colors.fg : "white",
+                  bg: tool === 0 ? colors.bg : "transparent",
+                }
+              : cell,
           ),
         );
 
@@ -225,6 +237,21 @@ function App() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
   // CAN TOUCH CODE UNDER THIS
+  const canvasRef = useRef<any>(null);
+
+  const imageFn = async () => {
+    const originalTransform = canvasRef.current.style.transform;
+    canvasRef.current.style.transform = "none";
+    const canvas = await html2canvas(canvasRef.current, {
+      backgroundColor: "#000000",
+    });
+    canvasRef.current.style.transform = originalTransform;
+    const dataURL = canvas.toDataURL("image/png");
+    const link = document.createElement("a");
+    link.href = dataURL;
+    link.download = "artwork.png";
+    link.click();
+  };
 
   return (
     <>
@@ -248,10 +275,11 @@ function App() {
         >
           <div className="w-[100%] h-full aspect-square flex justify-center items-center p-1">
             <div
+              ref={canvasRef}
               style={{
                 transform: `translate(${wState.x}px, ${wState.y}px) scale(${wState.zoom})`,
               }}
-              className="w-fit h-fit border-1 border-[rgba(255,255,255,0.3)] p-2 rounded-[0.6em] transition-all duration-1"
+              className="inline-block w-fit h-fit border-1 border-[rgba(255,255,255,0.3)] p-2 rounded-[0.6em] transition-all duration-1"
             >
               <div className="w-fit h-fit border-1 border-[rgba(255,255,255,0.1)]">
                 <pre
@@ -308,6 +336,8 @@ function App() {
               setBrush={setBrush}
               dimensions={dimensions}
               setDimensions={setDimensions}
+              colors={colors}
+              setColors={setColors}
             />
           </div>
         </div>
@@ -329,7 +359,7 @@ function App() {
           <Eraser />
         </div>
       </div>
-      <ExportSection />
+      <ExportSection imageFn={imageFn} grid={grid} />
     </>
   );
 }
