@@ -3,7 +3,7 @@ import Input from "./Input/Input";
 import Button from "../Button/Button";
 import { useRef, useState } from "react";
 import { EmojiPicker } from "frimousse";
-import { specialBoxes } from "../../lib/boxes";
+import { boxs, specialBoxes } from "../../lib/boxes";
 
 function Settings({
   dimensions,
@@ -124,13 +124,16 @@ function Settings({
       <Title title="Box Drawing" />
       <div className="grid grid-cols-[10rem_1fr] items-center h-40">
         <div className="grid grid-cols-3 grid-rows-3 h-40 aspect-square mx-5 border-1 bg-[#121212] border-[#3b3b3b] rounded-4xl gap-1 p-3 overflow-hidden">
-          <BoxChar c="╭" />
-          <BoxChar c="─" />
-          <BoxChar c="╮" />
-          <BoxChar c="│" />
-          <BoxChar c="╰" />
+          <BoxChar setBrush={setBrush} c={boxs[boxOptions.boxSet].corner1} />
+          <BoxChar setBrush={setBrush} c={boxs[boxOptions.boxSet].hori} />
+          <BoxChar setBrush={setBrush} c={boxs[boxOptions.boxSet].corner2} />
+          <BoxChar setBrush={setBrush} c={boxs[boxOptions.boxSet].vert} />
+          <BoxChar setBrush={setBrush} c={boxs[boxOptions.boxSet].corner3} />
           <div className="[grid-area:2/2/3/4] overflow-hidden w-full grid grid-cols-[3fr_1.6fr] h-full hover:bg-[#252525] cursor-pointer bg-[#222222] text-[Hack] text-2xl rounded-[1.6em]">
-            <div className="w-full h-full flex justify-center items-center">
+            <div
+              onClick={() => setBrush(specialBoxes[boxOptions.specialChar])}
+              className="w-full h-full flex justify-center items-center"
+            >
               {specialBoxes[boxOptions.specialChar]}
             </div>
             <div
@@ -152,6 +155,7 @@ function Settings({
                     onClick={() => {
                       setBoxOptions((p) => ({ ...p, specialChar: i }));
                       setIsSpecialOpen(false);
+                      setBrush(item);
                     }}
                     className="border-1 font-[Hack] w-full p-1 rounded-[5px] hover:bg-[rgba(255,255,255,0.1)] border-[rgba(255,255,255,0.1)]"
                   >
@@ -162,12 +166,20 @@ function Settings({
             </div>
           )}
 
-          <div className="w-full bg-[#121212]">
+          <div
+            onClick={() => {
+              setBoxOptions((p) => {
+                const nextSet = (p.boxSet + 1) % boxs.length;
+                return { ...p, boxSet: nextSet };
+              });
+            }}
+            className="w-full bg-[#121212]"
+          >
             <button className="flex justify-center items-center w-full h-full active:scale-95 bg-linear-to-b to-[#0a0a0a] from-[#121212] text-[#cbcbcb] border-1 border-[#2b2b2b] rounded-3xl text-xl transition-all duration-200">
               <RotateCw />
             </button>
           </div>
-          <BoxChar c="╯" />
+          <BoxChar setBrush={setBrush} c={boxs[boxOptions.boxSet].corner4} />
         </div>
         <div className="justify-end flex h-26 mx-5 border-1 border-l-0 bg-[#121212] border-[#3b3b3b] rounded-4xl rounded-l-[0] gap-1 p-2">
           <div className="font-[Geist] relative grid grid-cols-2 grid-rows-2 p-1 h-full aspect-square bg-[#111111] shadow-[0_0_10px_rgba(0,0,0,0.1)] border-1 border-[#4b4b4b] rotate-45 scale-120 rounded-[1.5rem]">
@@ -273,9 +285,14 @@ const CharSelect = ({ brush, setBrush }: { brush: string; setBrush: any }) => {
   );
 };
 
-const BoxChar = ({ c }: { c: string }) => {
+const BoxChar = ({ c, setBrush }: { c: string; setBrush: any }) => {
   return (
-    <div className="w-full h-full hover:bg-[#252525] cursor-pointer bg-[#222222] flex justify-center items-center text-[Hack] text-2xl rounded-[1.6em]">
+    <div
+      onClick={() => {
+        setBrush(c);
+      }}
+      className="w-full h-full hover:bg-[#252525] cursor-pointer bg-[#222222] flex justify-center items-center text-[Hack] text-2xl rounded-[1.6em]"
+    >
       {c}
     </div>
   );

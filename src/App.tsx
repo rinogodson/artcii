@@ -226,7 +226,7 @@ function App() {
   return (
     <>
       <div className="overflow-hidden sm:grid grid-cols-[20vw_60vw_20vw] grid-rows-[100vh] flex flex-col sm:flex-row h-[calc(100vh_-_1.5em)] w-screen sm:py-0 py-5 pb-0">
-        <div className="flex flex-col w-full min-w-[18em] sm:h-full h-fit justify-start items-center z-100">
+        <div className="flex flex-col w-full min-w-[20em] sm:h-full h-fit justify-start items-center z-100">
           <div className="border-1 m-10 border-[rgba(255,255,255,0.4)] bg-black sm:px-7 px-8 sm:py-7 py-9 rounded-2xl w-fit h-fit">
             <img src="header.svg" alt="header" className="w-70" />
           </div>
