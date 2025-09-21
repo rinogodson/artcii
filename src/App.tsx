@@ -53,7 +53,7 @@ function App() {
     isDrawing: false,
   });
 
-  const [brush, setBrush] = useState<string>("R");
+  const [brush, setBrush] = useState<string>("#");
 
   const zoomRef = useRef<HTMLDivElement>(null);
   const panStart = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -243,7 +243,7 @@ function App() {
                               ),
                             );
                           }}
-                          className="border-[0.001em] border-[rgba(255,255,255,0.06)] hover:bg-[#1b1b1b] hover:text-[rgba(255,255,255,0.8)] transition-all duration-50"
+                          className="w-[1ch] border-[0.001em] border-[rgba(255,255,255,0.06)] hover:bg-[#1b1b1b] hover:text-[rgba(255,255,255,0.8)] transition-all duration-50"
                         >
                           {ch.c}
                         </span>
@@ -257,7 +257,12 @@ function App() {
         </div>
         <div className="w-full h-full sm:px-0 px-0 flex justify-end items-center">
           <div className="overflow-scroll overflow-x-hidden shadow-[0_0_50px_rgba(0,0,0,1)] w-full min-w-[20em] text-white bg-[rgba(40,40,40,0.6)] backdrop-blur-2xl z-1000 sm:mr-4 sm:h-[90%] h-full border-1 sm:border-b-1 sm:border-t-1 border-t-2 border-b-0 border-[rgba(255,255,255,0.2)] rounded-3xl sm:rounded-b-3xl rounded-b-[0]">
-            <Settings dimensions={dimensions} setDimensions={setDimensions} />
+            <Settings
+              brush={brush}
+              setBrush={setBrush}
+              dimensions={dimensions}
+              setDimensions={setDimensions}
+            />
           </div>
         </div>
       </div>

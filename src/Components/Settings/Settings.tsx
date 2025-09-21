@@ -1,14 +1,22 @@
 import { ChevronDown, RotateCw, X } from "lucide-react";
 import Input from "./Input/Input";
 import Button from "../Button/Button";
+import { useRef, useState } from "react";
+import { EmojiPicker, EmojiPickerSearchProps } from "frimousse";
 
 function Settings({
   dimensions,
   setDimensions,
+  brush,
+  setBrush,
 }: {
   dimensions: { rows: number; cols: number };
   setDimensions: any;
+  brush: string;
+  setBrush: any;
 }) {
+  const [isEmojiOpen, setIsEmojiOpen] = useState<boolean>(false);
+
   return (
     <>
       <Title title="Dimensions" />
@@ -39,10 +47,69 @@ function Settings({
       </div>
       <Title title="Character" />
       <div className="grid grid-cols-[7.5rem_1fr] mx-5 gap-3">
-        <CharSelect />
+        <CharSelect brush={brush} setBrush={setBrush} />
         <div className="h-full w-full flex flex-col gap-2">
-          <Button text="Nerd Font" />
-          <Button text="Emoji" />
+          <Button
+            text="Nerd Font"
+            onclick={() => {
+              window.open(
+                "https://www.nerdfonts.com/cheat-sheet",
+                "_blank",
+                "noopener,noreferrer",
+              );
+            }}
+          />
+
+          <Button
+            onclick={() => {
+              setIsEmojiOpen(!isEmojiOpen);
+            }}
+            text="Emoji"
+          />
+          {isEmojiOpen && (
+            <EmojiPicker.Root
+              onEmojiSelect={(emoji) => {
+                setBrush(emoji.emoji);
+              }}
+              className="isolate absolute border-1 border-[#3b3b3b] rounded-2xl z-1000 right-2 translate-y-[8em] flex h-[368px] w-fit flex-col bg-white dark:bg-neutral-900"
+            >
+              <EmojiPicker.Search className="z-10 mx-2 mt-2 appearance-none rounded-md bg-neutral-100 px-2.5 py-2 text-sm dark:bg-neutral-800" />
+              <EmojiPicker.Viewport className="relative flex-1 outline-hidden">
+                <EmojiPicker.Loading className="absolute inset-0 flex items-center justify-center text-neutral-400 text-sm dark:text-neutral-500">
+                  Loading…
+                </EmojiPicker.Loading>
+                <EmojiPicker.Empty className="absolute inset-0 flex items-center justify-center text-neutral-400 text-sm dark:text-neutral-500">
+                  No emoji found.
+                </EmojiPicker.Empty>
+                <EmojiPicker.List
+                  className="select-none pb-1.5"
+                  components={{
+                    CategoryHeader: ({ category, ...props }) => (
+                      <div
+                        className="bg-white px-3 pt-3 pb-1.5 font-medium text-neutral-600 text-xs dark:bg-neutral-900 dark:text-neutral-400"
+                        {...props}
+                      >
+                        {category.label}
+                      </div>
+                    ),
+                    Row: ({ children, ...props }) => (
+                      <div className="scroll-my-1.5 px-1.5" {...props}>
+                        {children}
+                      </div>
+                    ),
+                    Emoji: ({ emoji, ...props }) => (
+                      <button
+                        className="flex size-8 items-center justify-center rounded-md text-lg data-[active]:bg-neutral-100 dark:data-[active]:bg-neutral-800"
+                        {...props}
+                      >
+                        {emoji.emoji}
+                      </button>
+                    ),
+                  }}
+                />
+              </EmojiPicker.Viewport>
+            </EmojiPicker.Root>
+          )}
         </div>
       </div>
       <Title title="Box Drawing" />
@@ -139,13 +206,31 @@ function Settings({
 
 export default Settings;
 
-const CharSelect = () => {
+const CharSelect = ({ brush, setBrush }: { brush: string; setBrush: any }) => {
+  const iref = useRef<any>(null);
   return (
     <div className="flex justify-center items-center flex-col gap-2">
-      <div className="w-30 aspect-square bg-[rgba(0,0,0,0.3)] border-3 border-[#2b2b2b] rounded-3xl flex justify-center items-center text-7xl font-[Hack]">
+      <div
+        onClick={() => {
+          iref.current?.focus();
+        }}
+        className="w-30 aspect-square bg-[rgba(0,0,0,0.3)] border-3 border-[#2b2b2b] focus-within:border-blue-600 overflow-hidden cursor-pointer rounded-3xl flex justify-center items-center text-7xl font-[Hack] transition-all duration-200"
+      >
         <div className="w-full flex justify-center border-y-1 border-[#2b2b2b]">
-          <div className="w-[calc(1ch_+_2px)] overflow-visible h-fit border-x-1 border-[#2b2b2b]">
-            <input placeholder="#" className="w-[2ch]" />
+          <div className="w-[calc(1ch_+_2px)] h-fit border-x-1 border-[#2b2b2b]">
+            <input
+              ref={iref}
+              placeholder="#"
+              className="w-[calc(7.5rem_-_1ch_-_2px)] caret-transparent cursor-pointer"
+              value={brush}
+              onChange={(e) => {
+                if (e.target.value == "") {
+                  setBrush(" ");
+                } else {
+                  setBrush(e.target.value[e.target.value.length - 1]);
+                }
+              }}
+            />
           </div>
         </div>
       </div>
