@@ -29,7 +29,9 @@ const Layer = () => {
     <div className="hover:bg-[rgba(255,255,255,0.15)] px-2 bg-[rgba(255,255,255,0.1)] h-10 w-full border-b-1 border-black flex justify-between items-center">
       <div className="flex gap-2">
         <Layers2 size={23} />
-        <p>Layer 1</p>
+        <p className="whitespace-nowrap overflow-hidden overflow-ellipsis w-[14ch]">
+          Layer 1 adhfkjsdhfjlhsdjlfhdsjlhghafslkhgflhsaljfhjldsfhdjlsh
+        </p>
       </div>
       <div className="flex gap-2">
         <Eye />

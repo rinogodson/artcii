@@ -2,17 +2,39 @@ import { ChevronDown, RotateCw, X } from "lucide-react";
 import Input from "./Input/Input";
 import Button from "../Button/Button";
 
-function Settings() {
+function Settings({
+  dimensions,
+  setDimensions,
+}: {
+  dimensions: { rows: number; cols: number };
+  setDimensions: any;
+}) {
   return (
     <>
       <Title title="Dimensions" />
       <div className="w-full flex flex-col justify-start items-center">
         <div className="h-15 flex mx-5">
-          <Input />
+          <Input
+            value={dimensions.rows}
+            changeFn={(val: number) => {
+              setDimensions((p: typeof dimensions) => ({
+                ...p,
+                rows: val,
+              }));
+            }}
+          />
           <div className="h-full w-30 flex justify-center items-center">
             <X className="text-[#4b4b4b]" size={30} />
           </div>
-          <Input />
+          <Input
+            value={dimensions.cols}
+            changeFn={(val: number) => {
+              setDimensions((p: typeof dimensions) => ({
+                ...p,
+                cols: val,
+              }));
+            }}
+          />
         </div>
       </div>
       <Title title="Character" />

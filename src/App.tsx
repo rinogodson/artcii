@@ -1,18 +1,19 @@
-// TODO:
-// -- modularize components for a neat structure
-// -- add layers logic
-// -- add panning for mobile
-// -- add the settings expand for mobile
-
 import { useEffect, useRef, useState } from "react";
 import Settings from "./Components/Settings/Settings";
 import Layers from "./Components/Layers/Layers";
 import { Brush, Eraser, PaintBucket } from "lucide-react";
 
+const ROWS = 12;
+const COLS = 20;
+
 function App() {
+  const [dimensions, setDimensions] = useState<{ rows: number; cols: number }>({
+    rows: ROWS,
+    cols: COLS,
+  });
   const [grid, setGrid] = useState<{ c: string; bg: string; fg: string }[][]>(
-    Array.from({ length: 12 }, () =>
-      Array(20).fill({ c: " ", bg: "transparent", fg: "#ffffff" }),
+    Array.from({ length: ROWS }, () =>
+      Array(COLS).fill({ c: " ", bg: "transparent", fg: "#ffffff" }),
     ),
   );
 
@@ -26,8 +27,12 @@ function App() {
     {
       name: "Layer 1",
       show: true,
-      g: Array.from({ length: 12 }, () =>
-        Array(20).fill({ c: " ", bg: "transparent", fg: "#ffffff" }),
+      g: Array.from({ length: ROWS }, () =>
+        Array(COLS).fill({
+          c: " ",
+          bg: "transparent",
+          fg: "#ffffff",
+        }),
       ),
     },
   ]);
@@ -63,6 +68,19 @@ function App() {
       ),
     );
   };
+
+  // the rows and cols changing logic, it's a bit complicated... ye
+  useEffect(() => {
+    setGrid((prev) => {
+      return Array.from({ length: dimensions.rows }, (_, r) =>
+        Array.from(
+          { length: dimensions.cols },
+          (_, c) =>
+            prev[r]?.[c] ?? { c: " ", bg: "transparent", fg: "#ffffff" },
+        ),
+      );
+    });
+  }, [dimensions]);
 
   // everything under this is either a shortcut setting or a panning and zooming control
   // don't touch it if you don't need to, do what i say..!
@@ -239,7 +257,7 @@ function App() {
         </div>
         <div className="w-full h-full sm:px-0 px-0 flex justify-end items-center">
           <div className="overflow-scroll overflow-x-hidden shadow-[0_0_50px_rgba(0,0,0,1)] w-full min-w-[20em] text-white bg-[rgba(40,40,40,0.6)] backdrop-blur-2xl z-1000 sm:mr-4 sm:h-[90%] h-full border-1 sm:border-b-1 sm:border-t-1 border-t-2 border-b-0 border-[rgba(255,255,255,0.2)] rounded-3xl sm:rounded-b-3xl rounded-b-[0]">
-            <Settings />
+            <Settings dimensions={dimensions} setDimensions={setDimensions} />
           </div>
         </div>
       </div>

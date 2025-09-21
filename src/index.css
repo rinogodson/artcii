@@ -3,6 +3,7 @@
 
 * {
   outline: none;
+  user-select: none;
 }
 
 @font-face {
