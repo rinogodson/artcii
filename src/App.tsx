@@ -17,6 +17,8 @@ function App() {
     ),
   );
 
+  const [selectedLayer, setSelectedLayer] = useState<number>(0);
+
   const [layers, setLayers] = useState<
     {
       name: string;
@@ -26,6 +28,17 @@ function App() {
   >([
     {
       name: "Layer 1",
+      show: true,
+      g: Array.from({ length: ROWS }, () =>
+        Array(COLS).fill({
+          c: " ",
+          bg: "transparent",
+          fg: "#ffffff",
+        }),
+      ),
+    },
+    {
+      name: "Layer 2",
       show: true,
       g: Array.from({ length: ROWS }, () =>
         Array(COLS).fill({
@@ -58,14 +71,43 @@ function App() {
   const zoomRef = useRef<HTMLDivElement>(null);
   const panStart = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
+  useEffect(() => {
+    const newGrid = Array.from({ length: grid.length }, () =>
+      Array(grid[0].length).fill({ c: " ", bg: "transparent", fg: "#ffffff" }),
+    );
+    // frontside layers overlapps
+    for (let layerIdx = layers.length - 1; layerIdx >= 0; layerIdx--) {
+      const layer = layers[layerIdx];
+      if (!layer.show) continue;
+
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const cell = layer.g[r][c];
+          // the bg will be considered
+          if (cell.c !== " " || cell.bg !== "transparent") {
+            newGrid[r][c] = cell;
+          }
+        }
+      }
+    }
+
+    setGrid(newGrid);
+  }, [layers]);
+
   const handleDrawing = (r: number, c: number) => {
     if (wState.isPanningMode) return;
-    setGrid((prev: typeof grid) =>
-      prev.map((row, i) =>
-        row.map((ch, j) =>
-          i === r && j === c ? { ...grid[i][j], c: brush } : ch,
-        ),
-      ),
+
+    setLayers((prevLayers) =>
+      prevLayers.map((layer, idx) => {
+        if (idx !== selectedLayer) return layer;
+        const newGrid = layer.g.map((row, i) =>
+          row.map((cell, j) =>
+            i === r && j === c ? { ...cell, c: brush } : cell,
+          ),
+        );
+
+        return { ...layer, g: newGrid };
+      }),
     );
   };
 
@@ -189,7 +231,12 @@ function App() {
             <img src="header.svg" alt="header" className="w-70" />
           </div>
           <div className="gap-3 flex flex-col p-3 shadow-[0_0_50px_rgba(0,0,0,1)] bg-[rgba(40,40,40,0.6)] backdrop-blur-2xl w-[90%] h-fit min-h-100 rounded-3xl border-1 border-[rgba(255,255,255,0.2)]">
-            <Layers />
+            <Layers
+              selectedLayer={selectedLayer}
+              setSelectedLayer={setSelectedLayer}
+              layers={layers}
+              setLayers={setLayers}
+            />
           </div>
         </div>
         <div

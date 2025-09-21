@@ -2,7 +2,8 @@ import { ChevronDown, RotateCw, X } from "lucide-react";
 import Input from "./Input/Input";
 import Button from "../Button/Button";
 import { useRef, useState } from "react";
-import { EmojiPicker, EmojiPickerSearchProps } from "frimousse";
+import { EmojiPicker } from "frimousse";
+import { specialBoxes } from "../../lib/boxes";
 
 function Settings({
   dimensions,
@@ -16,6 +17,13 @@ function Settings({
   setBrush: any;
 }) {
   const [isEmojiOpen, setIsEmojiOpen] = useState<boolean>(false);
+  const [isSpecialOpen, setIsSpecialOpen] = useState<boolean>(false);
+
+  const [boxOptions, setBoxOptions] = useState({
+    boxSet: 0,
+    specialChar: 0,
+    cornerChar: "1111",
+  });
 
   return (
     <>
@@ -70,6 +78,7 @@ function Settings({
             <EmojiPicker.Root
               onEmojiSelect={(emoji) => {
                 setBrush(emoji.emoji);
+                setIsEmojiOpen(false);
               }}
               className="isolate absolute border-1 border-[#3b3b3b] rounded-2xl z-1000 right-2 translate-y-[8em] flex h-[368px] w-fit flex-col bg-white dark:bg-neutral-900"
             >
@@ -122,12 +131,37 @@ function Settings({
           <BoxChar c="╰" />
           <div className="[grid-area:2/2/3/4] overflow-hidden w-full grid grid-cols-[3fr_1.6fr] h-full hover:bg-[#252525] cursor-pointer bg-[#222222] text-[Hack] text-2xl rounded-[1.6em]">
             <div className="w-full h-full flex justify-center items-center">
-              █
+              {specialBoxes[boxOptions.specialChar]}
             </div>
-            <div className="w-full h-full flex justify-center items-center border-l-1 border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)]">
+            <div
+              onClick={() => setIsSpecialOpen(!isSpecialOpen)}
+              style={{
+                background: isSpecialOpen ? "rgba(255,255,255,0.1)" : "",
+              }}
+              className="w-full h-full flex justify-center items-center border-l-1 border-[rgba(255,255,255,0.1)] "
+            >
               <ChevronDown size={17} />
             </div>
           </div>
+
+          {isSpecialOpen && (
+            <div className="absolute overflow-scroll p-3 flex z-100 border-neutral-700 border-1 w-55 h-60 rounded-2xl translate-y-23 translate-x-12 bg-neutral-900">
+              <div className="w-full h-full grid grid-cols-5 gap-2 place-items-center mb-10">
+                {specialBoxes.map((item, i) => (
+                  <div
+                    onClick={() => {
+                      setBoxOptions((p) => ({ ...p, specialChar: i }));
+                      setIsSpecialOpen(false);
+                    }}
+                    className="border-1 font-[Hack] w-full p-1 rounded-[5px] hover:bg-[rgba(255,255,255,0.1)] border-[rgba(255,255,255,0.1)]"
+                  >
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="w-full bg-[#121212]">
             <button className="flex justify-center items-center w-full h-full active:scale-95 bg-linear-to-b to-[#0a0a0a] from-[#121212] text-[#cbcbcb] border-1 border-[#2b2b2b] rounded-3xl text-xl transition-all duration-200">
               <RotateCw />
@@ -172,7 +206,7 @@ function Settings({
             return (
               <div
                 style={{ backgroundColor: item }}
-                className="w-5 aspect-square rounded-full border-1"
+                className="w-5 aspect-square rounded-full border-2 border-neutral-700"
               ></div>
             );
           })}
@@ -182,6 +216,7 @@ function Settings({
         <p className="font-[Geist]">Background</p>
         <div className="flex w-full justify-around px-5">
           {[
+            "transparent",
             "black",
             "red",
             "green",
@@ -194,7 +229,7 @@ function Settings({
             return (
               <div
                 style={{ backgroundColor: item }}
-                className="w-5 aspect-square rounded-full border-1"
+                className="w-5 aspect-square rounded-full border-2 border-neutral-700"
               ></div>
             );
           })}
